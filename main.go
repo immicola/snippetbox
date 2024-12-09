@@ -28,13 +28,19 @@ func snippetboxCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Display a form for creating a new snippet..."))
 }
 
+func snippetboxCreatePost(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Save a new snippet..."))
+}
+
 func main() {
 	// Use the http.NewServeMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern.
 	mux := http.NewServeMux()
-	mux.HandleFunc("/{$}", home)
-	mux.HandleFunc("/snippet/view/{id}", snippetboxView)
-	mux.HandleFunc("/snippet/create", snippetboxCreate)
+	mux.HandleFunc("GET /{$}", home)
+	mux.HandleFunc("GET /snippet/view/{id}", snippetboxView)
+	mux.HandleFunc("GET /snippet/create", snippetboxCreate)
+	mux.HandleFunc("POST /snippet/create", snippetboxCreatePost)
+
 	// mux.HandleFunc("google.com/", snippetboxCreate)
 
 	// Print a log message to say that the server is starting.
