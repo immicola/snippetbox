@@ -1,7 +1,9 @@
+// consists old main code from first lesson to 2.6 included.
 package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -10,6 +12,27 @@ import (
 // Define a home handler function which writes a byte slice containing
 // "Hello from Snippetbox" as the response body.
 func home(w http.ResponseWriter, r *http.Request) {
+
+	// Set a new cache-control header. If an existing "Cache-Control" header exists
+	// it will be overwritten.
+	w.Header().Set("Cache-Control", "public, max-age=31536000")
+
+	// In contrast, the Add() method appends a new "Cache-Control" header and can
+	// be called multiple times.
+	w.Header().Add("Cache-Control", "public")
+	w.Header().Add("Cache-Control", "max-age=31536000")
+
+	// Delete all values for the "Cache-Control" header.
+	w.Header().Del("Cache-Control")
+
+	// Retrieve the first value for the "Cache-Control" header.
+	w.Header().Get("Cache-Control")
+
+	// Retrieve a slice of all values for the "Cache-Control" header.
+	w.Header().Values("Cache-Control")
+
+	w.Header().Add("Server", "Go")
+
 	w.Write([]byte("timur ochkoshkin"))
 }
 
@@ -19,8 +42,14 @@ func snippetboxView(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	msg := fmt.Sprintf("display a specific snippet with ID %d...", id)
-	w.Write([]byte(msg))
+
+	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
+	fmt.Fprintf(w, "\nThe path: %s", getPath(r))
+
+	// msg := fmt.Sprintf("d")
+	// path := fmt.Sprintf("\nThe path: %s", getPath(r))
+
+	// w.Write([]byte(msg + path))
 	// w.Write([]byte("Display a specific snippet..."))
 }
 
@@ -29,7 +58,20 @@ func snippetboxCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func snippetboxCreatePost(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Save a new snippet..."))
+	// Use the w.WriteHeader() method to send a 201 status code.
+	w.WriteHeader(http.StatusCreated)
+
+	// Then w.Write() method to write the response body as normal.
+	w.Write([]byte("Save a new snippet...\n"))
+}
+
+func getPath(r *http.Request) string {
+	return (r.URL.Path)
+}
+
+func ioResponse(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Hello world with io.WriteString\n")
+	fmt.Fprint(w, "Hello world with fmt.Fprint")
 }
 
 func main() {
@@ -39,6 +81,7 @@ func main() {
 	mux.HandleFunc("GET /{$}", home)
 	mux.HandleFunc("GET /snippet/view/{id}", snippetboxView)
 	mux.HandleFunc("GET /snippet/create", snippetboxCreate)
+	mux.HandleFunc("GET /ioResponse", ioResponse)
 	mux.HandleFunc("POST /snippet/create", snippetboxCreatePost)
 
 	// mux.HandleFunc("google.com/", snippetboxCreate)
